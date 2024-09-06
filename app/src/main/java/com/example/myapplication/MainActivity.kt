@@ -65,7 +65,6 @@ class MainActivity : ComponentActivity() {
 fun MyApp(modifier: Modifier = Modifier) {
     var shouldShowOnboarding by rememberSaveable { mutableStateOf(true) }
     val systemUiController = rememberSystemUiController()
-    var showButton by remember { mutableStateOf(true) } // State for button visibility
     val list = remember { mutableStateListOf("Hello", "World") } // Use mutableStateListOf
 
     Surface(modifier) {
@@ -77,10 +76,8 @@ fun MyApp(modifier: Modifier = Modifier) {
                 modifier = Modifier.background(MaterialTheme.colorScheme.primary),
                 onClicked = {
                     list.add("Test") // Add item to the list
-                    showButton = false // Hide the button
                 },
                 names = list,
-                showButton = showButton // Pass button visibility state
             )
         }
     }
@@ -112,7 +109,6 @@ private fun Greetings(
     modifier: Modifier = Modifier,
     onClicked: () -> Unit,
     names: List<String>,
-    showButton: Boolean // Add showButton parameter
 ) {
     Box(modifier = modifier) {
         LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
@@ -120,8 +116,6 @@ private fun Greetings(
                 Greeting(name = name)
             }
         }
-        // Show button only if showButton is true
-        if (showButton) {
             LargeFloatingActionButton(
                 onClick = onClicked,
                 modifier = Modifier
@@ -131,7 +125,6 @@ private fun Greetings(
                 Icon(imageVector = Icons.Filled.Add, contentDescription = null)
             }
         }
-    }
 }
 
 @Composable
