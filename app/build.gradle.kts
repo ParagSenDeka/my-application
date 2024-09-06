@@ -50,7 +50,8 @@ android {
 }
 
 dependencies {
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
