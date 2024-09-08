@@ -12,13 +12,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -27,6 +31,9 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -36,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,19 +71,63 @@ class MainActivity : ComponentActivity() {
 fun MyApp(modifier: Modifier = Modifier) {
     val systemUiController = rememberSystemUiController()
     val list = remember { mutableStateListOf("Hello", "World") } // Use mutableStateListOf
+    var showAddScreen by remember { mutableStateOf(false) }
 
     Surface(modifier) {
         systemUiController.setStatusBarColor(Color.Transparent, darkIcons = !isSystemInDarkTheme())
             Greetings(
                 modifier = Modifier.background(MaterialTheme.colorScheme.primary),
-                onClicked = {
-                    list.add("Test") // Add item to the list
-                },
+                onClicked = {showAddScreen=true},
                 names = list,
             )
+        if (showAddScreen) {
+            AddScreen(
+                onSubmit = {text-> list.add(text); showAddScreen = false },
+                onCancel = { showAddScreen = false }
+            )
+        }
         }
     }
 
+
+@Composable
+fun AddScreen(
+    onSubmit: (String) -> Unit, // Pass the entered text on submit
+    onCancel: () -> Unit
+) {
+    var textFieldValue by remember { mutableStateOf("") }
+
+    AlertDialog(
+        shape = RoundedCornerShape(5),
+        onDismissRequest = onCancel, // Called when the user tries to dismiss the dialog
+        title = { Text("Add New Item") },
+        text = {
+            Column {
+                TextField(
+                    value = textFieldValue,
+                    onValueChange = { textFieldValue = it },
+                    placeholder = { Text("Enter a name") },
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10)),
+                    colors = TextFieldDefaults.colors(contentColorFor(MaterialTheme.colorScheme.onBackground), unfocusedIndicatorColor = Color.Transparent, focusedIndicatorColor = Color.Transparent)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSubmit(textFieldValue) } // Call onSubmit with the text
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onCancel
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
 
 
 @Composable
