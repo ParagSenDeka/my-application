@@ -8,7 +8,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -63,15 +61,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
-    var shouldShowOnboarding by rememberSaveable { mutableStateOf(true) }
     val systemUiController = rememberSystemUiController()
     val list = remember { mutableStateListOf("Hello", "World") } // Use mutableStateListOf
 
     Surface(modifier) {
         systemUiController.setStatusBarColor(Color.Transparent, darkIcons = !isSystemInDarkTheme())
-        if (shouldShowOnboarding) {
-            OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false })
-        } else {
             Greetings(
                 modifier = Modifier.background(MaterialTheme.colorScheme.primary),
                 onClicked = {
@@ -81,28 +75,8 @@ fun MyApp(modifier: Modifier = Modifier) {
             )
         }
     }
-}
 
 
-@Composable
-fun OnboardingScreen(
-    onContinueClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Welcome to the Basics Code lab!")
-        Button(
-            modifier = Modifier.padding(vertical = 24.dp),
-            onClick = onContinueClicked,
-        ) {
-            Text("Continue")
-        }
-    }
-}
 
 @Composable
 private fun Greetings(
@@ -141,7 +115,6 @@ private fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 private fun CardContent(name: String,modifier: Modifier = Modifier) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-
     Row(
         modifier = modifier
             .padding(12.dp)
