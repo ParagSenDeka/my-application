@@ -32,8 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -44,11 +42,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
+data class GreetingItem(
+    val name: String,
+    val title: String,
+    val description: String,
+)
 
 
 class MainActivity : ComponentActivity() {
@@ -57,10 +60,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme(
                 darkTheme = isSystemInDarkTheme(),
-                dynamicColor = false,
+                dynamicColor = false
+
             ) {
-                MyApp(modifier = Modifier
-                    .fillMaxSize()
+                val systemUiController= rememberSystemUiController()
+                systemUiController.setStatusBarColor(
+                    color = MaterialTheme.colorScheme.primary,
+                    darkIcons = !isSystemInDarkTheme()
+                )
+                MyApp(
+                    modifier = Modifier
+                        .fillMaxSize()
                 )
             }
         }
@@ -69,12 +79,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
-    val systemUiController = rememberSystemUiController()
-    val list = remember { mutableStateListOf("Hello", "World") } // Use mutableStateListOf
+    val list = remember { mutableStateListOf(
+        GreetingItem("Name1", "Title1", "Description1"),
+        GreetingItem("Name2", "Title2", "Description2"),
+    ) }
     var showAddScreen by remember { mutableStateOf(false) }
 
-    Surface(modifier) {
-        systemUiController.setStatusBarColor(Color.Transparent, darkIcons = !isSystemInDarkTheme())
+    Surface(
+        modifier=modifier
+    ) {
             Greetings(
                 modifier = Modifier.background(MaterialTheme.colorScheme.primary),
                 onClicked = {showAddScreen=true},
@@ -92,37 +105,50 @@ fun MyApp(modifier: Modifier = Modifier) {
 
 @Composable
 fun AddScreen(
-    onSubmit: (String) -> Unit, // Pass the entered text on submit
+    onSubmit: (GreetingItem) -> Unit,
     onCancel: () -> Unit
 ) {
-    var textFieldValue by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
 
     AlertDialog(
         shape = RoundedCornerShape(5),
-        onDismissRequest = onCancel, // Called when the user tries to dismiss the dialog
+        onDismissRequest = onCancel,
         title = { Text("Add New Item") },
         text = {
             Column {
                 TextField(
-                    value = textFieldValue,
-                    onValueChange = { textFieldValue = it },
-                    placeholder = { Text("Enter a name") },
+                    value = title,
+                    onValueChange = { title = it },
+                    placeholder = { Text("Enter title") },
                     modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10)),
-                    colors = TextFieldDefaults.colors(contentColorFor(MaterialTheme.colorScheme.onBackground), unfocusedIndicatorColor = Color.Transparent, focusedIndicatorColor = Color.Transparent)
+                )
+                TextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    placeholder = { Text("Enter description") },
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10)),
+                )
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    placeholder = { Text("Enter name") },
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10)),
                 )
             }
         },
         confirmButton = {
             Button(
-                onClick = { onSubmit(textFieldValue) } // Call onSubmit with the text
+                onClick = {
+                    onSubmit(GreetingItem(name=name, title=title, description=description))
+                }
             ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            Button(
-                onClick = onCancel
-            ) {
+            Button(onClick = onCancel) {
                 Text("Cancel")
             }
         }
@@ -130,42 +156,45 @@ fun AddScreen(
 }
 
 
+
 @Composable
 private fun Greetings(
     modifier: Modifier = Modifier,
     onClicked: () -> Unit,
-    names: List<String>,
+    names: List<GreetingItem>,
 ) {
     Box(modifier = modifier) {
         LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
-            items(items = names) { name ->
-                Greeting(name = name)
+            items(items = names) { item ->
+                Greeting(item)
             }
         }
-            LargeFloatingActionButton(
-                onClick = onClicked,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = null)
-            }
+        LargeFloatingActionButton(
+            onClick = onClicked,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.Filled.Add, contentDescription = null)
         }
-}
-
-@Composable
-private fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground)
-    ) {
-        CardContent(name)
     }
 }
 
+@Composable
+private fun Greeting(item: GreetingItem, modifier: Modifier = Modifier) { // Use the data class
+    Card(
+        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground
+        )
+    ) {
+        CardContent(item)
+    }
+}
 
 @Composable
-private fun CardContent(name: String,modifier: Modifier = Modifier) {
+private fun CardContent(item: GreetingItem, modifier: Modifier = Modifier) { // Use the data class
     var expanded by rememberSaveable { mutableStateOf(false) }
     Row(
         modifier = modifier
@@ -182,29 +211,21 @@ private fun CardContent(name: String,modifier: Modifier = Modifier) {
                 .weight(1f)
                 .padding(12.dp)
         ) {
-            Text(text = "Hello, ")
-            Text(
-                text = name, style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold
-                )
-            )
+            Text(item.title)
+            Text(item.name, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold))
             if (expanded) {
-                Text(
-                    text = ("Composer ipsum color sit lazy, " +
-                            "padding theme elit, sed do bouncy. ").repeat(4),
-                )
+                Text(item.description)
             }
         }
         IconButton(onClick = { expanded = !expanded }) {
             Icon(
                 imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = if (expanded) {
-                    "Show More"
-                } else {
-                    "Show Less"
-                }
+                contentDescription = if (expanded) { "Show More" } else { "Show Less" }
             )
         }
     }
 }
+
+
+
 
