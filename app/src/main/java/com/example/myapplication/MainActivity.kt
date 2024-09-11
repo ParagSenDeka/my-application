@@ -55,6 +55,8 @@ data class GreetingItem(
 
 
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -95,7 +97,8 @@ fun MyApp(modifier: Modifier = Modifier) {
             )
         if (showAddScreen) {
             AddScreen(
-                onSubmit = {text-> list.add(text); showAddScreen = false },
+                onSubmit = {list.add(it)
+                            showAddScreen = false },
                 onCancel = { showAddScreen = false }
             )
         }
